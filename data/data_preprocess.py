@@ -1,4 +1,4 @@
-from dataset import ds
+from .dataset import ds
 
 def preprocess(example):
   input_text = example['input'] if example['input'].strip() else "< noinput >"

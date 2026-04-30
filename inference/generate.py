@@ -2,7 +2,6 @@ import torch
 from config import model
 from config import device
 from data.tokenized_data import tokenizer
-from data.tokenized_data import tokenize
 
 checkpoint = torch.load("artifacts/mamba_checkpoint_epoch10.pt", map_location=device)
 
@@ -24,7 +23,9 @@ def generate(prompt, max_new_tokens=100):
             if next_token.item() == tokenizer.eos_token_id:
                 break
 
-    return tokenizer.decode(X[0].tolist())
+    fullToken = tokenizer.decode(X[0].tolist())
+    output_token = fullToken.split("### Code:")[-1].strip()
+    return output_token
 
 def promptFormat(instruction,input="< noinput >"):
     return f"### Description : {instruction}\n### Input: {input}\n### Code:"

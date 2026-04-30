@@ -74,6 +74,106 @@ mamba_codeGen/
     └── mamba_checkpoint_epoch10.pt   # Trained model checkpoint
 ```
 
+## 🚀 Quick Start
+
+### Installation
+
+1. **Clone or download the repository**:
+```bash
+cd mamba_codeGen
+```
+
+2. **Create a virtual environment** (recommended):
+```bash
+python -m venv venv
+source venv/bin/activate  # On Windows: venv\Scripts\activate
+```
+
+3. **Install dependencies**:
+```bash
+pip install -r requirements.txt
+```
+
+**Required packages:**
+- `torch` - PyTorch for model computation
+- `transformers` - Hugging Face library for tokenizers and datasets
+- `fastapi` - REST API framework
+- `uvicorn` - ASGI server for running FastAPI
+- `pydantic` - Data validation for API requests
+
+### Running the API
+
+Start the FastAPI server:
+```bash
+python -m uvicorn api.app:app --reload --host 0.0.0.0 --port 8000
+```
+
+The API will be available at `http://localhost:8000`
+
+- **API Documentation**: Visit `http://localhost:8000/docs` (Swagger UI)
+- **Alternative Docs**: Visit `http://localhost:8000/redoc` (ReDoc)
+
+## 📡 API Endpoints
+
+### `POST /generate`
+
+Generate Python code based on task description and optional input.
+
+**Request Body:**
+```json
+{
+  "instruction": "Write a Python function to calculate the factorial of a number",
+  "input": "5"
+}
+```
+
+**Parameters:**
+- `instruction` (required): Task description for code generation
+  - Max length: 300 characters
+  - Must not be empty
+- `input` (optional): Additional input/context for the code
+  - Default: `"< noinput >"`
+  - Max length: 500 characters
+
+**Response:**
+```json
+{
+  "generated_code": "def factorial(n):\n    if n <= 1:\n        return 1\n    return n * factorial(n - 1)\n\nprint(factorial(5))"
+}
+```
+
+**Error Response:**
+```json
+{
+  "detail": "Model inference failed"
+}
+```
+
+**Example Usage (cURL):**
+```bash
+curl -X POST "http://localhost:8000/generate" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "instruction": "Write a Python function to calculate the factorial of a number",
+    "input": "5"
+  }'
+```
+
+**Example Usage (Python):**
+```python
+import requests
+
+url = "http://localhost:8000/generate"
+payload = {
+    "instruction": "Write a Python function to calculate the factorial of a number",
+    "input": "5"
+}
+
+response = requests.post(url, json=payload)
+result = response.json()
+print(result["generated_code"])
+```
+
 ## 🏗️ Architecture Overview
 
 ### Mamba Block
@@ -245,13 +345,90 @@ The model achieved good convergence during training:
 - **Validation Loss**: ~0.49 (indicating slight overfitting, manageable with regularization)
 - **Training Stability**: Smooth loss decrease over 20 epochs
 
+## � Docker & Cloud Deployment (Coming Soon)
+
+### Containerization with Docker
+
+Build a Docker image for consistent deployment:
+
+```bash
+# Build the Docker image
+docker build -t mamba-code-gen:latest .
+
+# Run the container locally
+docker run -p 8000:8000 mamba-code-gen:latest
+```
+
+**Dockerfile** (to be created):
+```dockerfile
+FROM python:3.10-slim
+
+WORKDIR /app
+
+COPY requirements.txt .
+RUN pip install --no-cache-dir -r requirements.txt
+
+COPY . .
+
+EXPOSE 8000
+
+CMD ["python", "-m", "uvicorn", "api.app:app", "--host", "0.0.0.0", "--port", "8000"]
+```
+
+### Cloud Deployment Options
+
+**AWS Deployment:**
+- **AWS EC2**: Deploy containerized API on EC2 instances
+- **AWS ECS**: Use Elastic Container Service for orchestration
+- **AWS SageMaker**: Alternative for managed inference
+- **AWS Lambda**: Serverless inference (if model size permits)
+
+**Google Cloud Deployment:**
+- **Cloud Run**: Serverless container deployment
+- **Compute Engine**: VM-based deployment
+- **Vertex AI**: Managed ML model deployment
+
+**Azure Deployment:**
+- **Azure Container Instances (ACI)**: Quick container deployment
+- **Azure App Service**: Web app hosting
+- **Azure ML**: Managed ML inference
+
+**Key Considerations:**
+- Model checkpoint size (~50MB) - requires model artifact storage
+- GPU availability - select instance types with GPU support
+- Scaling - load balancing for high-traffic scenarios
+- Cost optimization - use spot instances or auto-scaling groups
+
+### Environment Variables for Deployment
+
+```bash
+MODEL_PATH=/app/artifacts/mamba_checkpoint_epoch10.pt
+DEVICE=cuda  # or cpu
+BATCH_SIZE=1
+MAX_TOKENS=100
+```
+
+### Pre-Deployment Checklist
+
+- [ ] Optimize model inference speed
+- [ ] Add caching for repeated requests
+- [ ] Implement rate limiting
+- [ ] Add comprehensive logging/monitoring
+- [ ] Set up health check endpoints
+- [ ] Create `.dockerignore` to exclude unnecessary files
+- [ ] Test API response times under load
+
 ## 🔮 Future Improvements
 
 - [ ] Implement beam search for better code generation quality
 - [ ] Add temperature and top-k sampling strategies
-- [ ] Deploy REST API for inference
+- [ ] ✅ Deploy REST API for inference (in progress)
+- [ ] Dockerize the application
+- [ ] Deploy to cloud (AWS/GCP/Azure)
 - [ ] Model quantization for edge deployment
 - [ ] Extended context length (> 512 tokens)
+- [ ] Caching layer for frequent requests
+- [ ] Rate limiting and authentication
 
 ## 🐛 Troubleshooting
 

@@ -25,6 +25,7 @@ def generate(prompt, max_new_tokens=100):
 
     fullToken = tokenizer.decode(X[0].tolist())
     output_token = fullToken.split("### Code:")[-1].strip()
+    output_token = output_token.replace("<|endoftext|>", "").strip()
     return output_token
 
 def promptFormat(instruction,input="< noinput >"):

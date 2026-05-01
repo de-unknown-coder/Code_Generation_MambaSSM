@@ -345,21 +345,53 @@ The model achieved good convergence during training:
 - **Validation Loss**: ~0.49 (indicating slight overfitting, manageable with regularization)
 - **Training Stability**: Smooth loss decrease over 20 epochs
 
-## � Docker & Cloud Deployment (Coming Soon)
+## 🧪 Testing
+
+Unit tests are included to ensure code quality and reliability:
+
+### Running Tests
+
+```bash
+pytest
+```
+
+### Test Coverage
+
+- **`tests/test_api.py`**: Unit tests for the REST API endpoints
+  - Tests for `/generate` endpoint functionality
+  - Request validation tests
+  - Error handling tests
+
+- **`tests/test_inference.py`**: Unit tests for the inference module
+  - Tests for code generation pipeline
+  - Model loading and inference tests
+  - Output validation tests
+
+Run specific test file:
+```bash
+pytest tests/test_api.py -v
+pytest tests/test_inference.py -v
+```
+
+## 🐳 Docker & Cloud Deployment
 
 ### Containerization with Docker
 
-Build a Docker image for consistent deployment:
+A Dockerfile is included for consistent deployment across environments.
 
+**Build the Docker image:**
 ```bash
-# Build the Docker image
 docker build -t mamba-code-gen:latest .
+```
 
-# Run the container locally
+**Run the container locally:**
+```bash
 docker run -p 8000:8000 mamba-code-gen:latest
 ```
 
-**Dockerfile** (to be created):
+The API will be available at `http://localhost:8000` with documentation at `http://localhost:8000/docs`
+
+**Dockerfile Overview:**
 ```dockerfile
 FROM python:3.10-slim
 
@@ -422,8 +454,8 @@ MAX_TOKENS=100
 
 - [ ] Implement beam search for better code generation quality
 - [ ] Add temperature and top-k sampling strategies
-- [ ] ✅ Deploy REST API for inference (in progress)
-- [ ] Dockerize the application
+- [ ] ✅ Deploy REST API for inference (completed)
+- [ ] ✅ Dockerize the application (completed)
 - [ ] Deploy to cloud (AWS/GCP/Azure)
 - [ ] Model quantization for edge deployment
 - [ ] Extended context length (> 512 tokens)
